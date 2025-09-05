@@ -201,6 +201,13 @@ export function loadDemoData() {
     const demoAssets = createDemoSystemAssets();
     const allAssets = [...currentAssets, ...demoAssets];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(allAssets));
+    try {
+      fetch('/api/hr/assets/upsert-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-role': 'admin' },
+        body: JSON.stringify({ items: demoAssets }),
+      }).catch(() => {});
+    } catch {}
     console.log("Demo system assets loaded:", demoAssets.length);
     return demoAssets;
   }
