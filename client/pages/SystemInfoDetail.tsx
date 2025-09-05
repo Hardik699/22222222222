@@ -217,7 +217,7 @@ export default function SystemInfoDetail() {
     setShowForm(true);
   };
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isTelephony) {
       const number = isVitel ? form.vitelNumber : form.vonageNumber;
