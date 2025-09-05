@@ -49,7 +49,7 @@ export const seedDemo: RequestHandler = async (req, res, next) => {
         const vendor = ["Logitech", "HP", "Dell", "Sony", "Lenovo"][i % 5];
         await pool.query(
           `INSERT INTO system_assets (id, category, serial_number, vendor_name, company_name, purchase_date, warranty_end_date, created_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
           [
             assetId,
             cat,
