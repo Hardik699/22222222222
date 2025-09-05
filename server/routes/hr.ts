@@ -239,6 +239,39 @@ const listAssignments: RequestHandler = async (_req, res) => {
   res.json(resp);
 };
 
+const upsertPcLaptopsBatch: RequestHandler = async (req, res, next) => {
+  try {
+    const items: any[] = Array.isArray(req.body?.items) ? req.body.items : [];
+    for (const pc of items) {
+      await pool.query(
+        `INSERT INTO pc_laptop_assets (id, mouse_id, keyboard_id, motherboard_id, ram_id, ram_id2, storage_id, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+         ON CONFLICT (id) DO UPDATE SET
+           mouse_id = EXCLUDED.mouse_id,
+           keyboard_id = EXCLUDED.keyboard_id,
+           motherboard_id = EXCLUDED.motherboard_id,
+           ram_id = EXCLUDED.ram_id,
+           ram_id2 = EXCLUDED.ram_id2,
+           storage_id = EXCLUDED.storage_id,
+           created_at = LEAST(pc_laptop_assets.created_at, EXCLUDED.created_at)`,
+        [
+          pc.id,
+          pc.mouseId ?? null,
+          pc.keyboardId ?? null,
+          pc.motherboardId ?? null,
+          pc.ramId ?? null,
+          pc.ramId2 ?? null,
+          pc.storageId ?? null,
+          pc.createdAt || new Date().toISOString(),
+        ],
+      );
+    }
+    res.json({ upserted: items.length });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export async function seedDemoDirect(count = 10) {
   const req = { query: { count } } as any;
   const res = { json: (_: any) => _ } as any;
