@@ -69,6 +69,127 @@ async function init() {
 
     ALTER TABLE system_assets ADD COLUMN IF NOT EXISTS metadata JSONB;
 
+    -- Per-category tables (for reporting or future specialization)
+    CREATE TABLE IF NOT EXISTS mice (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS keyboards (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS motherboards (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS rams (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS storages (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS power_supplies (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS headphones (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS cameras (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS monitors (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS vonage_numbers (
+      id TEXT PRIMARY KEY,
+      number TEXT,
+      ext_code TEXT,
+      password TEXT,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS vitel_global_numbers (
+      id TEXT PRIMARY KEY,
+      number TEXT,
+      ext_code TEXT,
+      password TEXT,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    -- PC/Laptop asset composition table
+    CREATE TABLE IF NOT EXISTS pc_laptop_assets (
+      id TEXT PRIMARY KEY,
+      mouse_id TEXT,
+      keyboard_id TEXT,
+      motherboard_id TEXT,
+      ram_id TEXT,
+      ram_id2 TEXT,
+      storage_id TEXT,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS asset_assignments (
       id TEXT PRIMARY KEY,
       employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
