@@ -44,7 +44,7 @@ export function createServer() {
 
     if (process.env.AUTO_WIPE_IT_HR === "1") {
       import("./routes/hr").then(async (m) => {
-        try { await fetch("http://localhost:8080/api/hr/admin/wipe", { method: "POST", headers: { "x-role": "admin" } }); } catch {}
+        try { await m.wipeDirect?.(); } catch {}
       }).catch(() => {});
     }
 
