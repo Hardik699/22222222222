@@ -248,6 +248,9 @@ export function hrRouter(): Router {
   router.post("/employees", requireAdmin, createEmployee);
   router.put("/employees/:id", requireAdmin, updateEmployee);
   router.get("/assets", listAssets);
+  router.post("/assets/upsert-batch", requireAdmin, upsertAssetsBatch);
+  router.get("/it-accounts", listItAccounts);
+  router.post("/it-accounts", requireAdmin, createItAccount);
   router.get("/assignments", listAssignments);
   return router;
 }
