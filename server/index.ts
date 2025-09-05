@@ -42,8 +42,13 @@ export function createServer() {
   if (HAS_DB) {
     app.use("/api/hr", hrRouter());
 
+    if (process.env.AUTO_WIPE_IT_HR === "1") {
+      import("./routes/hr").then(async (m) => {
+        try { await fetch("http://localhost:8080/api/hr/admin/wipe", { method: "POST", headers: { "x-role": "admin" } }); } catch {}
+      }).catch(() => {});
+    }
+
     if (process.env.AUTO_SEED_DEMO === "1") {
-      // Fire and forget seeding; safe if already present
       import("./routes/hr").then((m) => m.seedDemoDirect?.(10)).catch(() => {});
     }
   }
