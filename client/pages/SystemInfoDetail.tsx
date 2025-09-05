@@ -280,6 +280,16 @@ export default function SystemInfoDetail() {
     const next = [record, ...assets];
     setAssets(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    // Sync to Neon DB
+    try {
+      await fetch('/api/hr/assets/upsert-batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-role': 'admin' },
+        body: JSON.stringify({ items: [record] }),
+      });
+    } catch (e) {
+      console.warn('DB sync failed', e);
+    }
     setShowForm(false);
     alert("Saved");
   };
