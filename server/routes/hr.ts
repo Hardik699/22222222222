@@ -317,6 +317,7 @@ export function hrRouter(): Router {
   router.post("/assets/upsert-batch", requireAdmin, upsertAssetsBatch);
   router.get("/it-accounts", listItAccounts);
   router.post("/it-accounts", requireAdmin, createItAccount);
+  router.post("/pc-laptops/upsert-batch", requireAdmin, upsertPcLaptopsBatch);
   router.get("/assignments", listAssignments);
   return router;
 }
