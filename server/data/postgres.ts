@@ -49,8 +49,11 @@ async function init() {
       department TEXT NOT NULL,
       status TEXT NOT NULL,
       table_number TEXT,
+      profile JSONB,
       created_at TIMESTAMPTZ NOT NULL
     );
+
+    ALTER TABLE employees ADD COLUMN IF NOT EXISTS profile JSONB;
 
     CREATE TABLE IF NOT EXISTS system_assets (
       id TEXT PRIMARY KEY,
