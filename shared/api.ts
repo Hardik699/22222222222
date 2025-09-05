@@ -65,3 +65,36 @@ export interface SalaryWithDocs extends SalaryRecord {
 export interface ListDocumentsResponse {
   items: SalaryDocument[];
 }
+
+// ---- HR / IT shared types ----
+export interface Employee {
+  id: string;
+  fullName: string;
+  email: string;
+  department: string;
+  status: "active" | "inactive";
+  tableNumber?: string;
+  createdAt: string;
+}
+
+export interface SystemAsset {
+  id: string;
+  category: string; // mouse, keyboard, monitor, headphone, camera, etc.
+  serialNumber: string;
+  vendorName: string;
+  companyName?: string;
+  purchaseDate: string; // ISO date
+  warrantyEndDate: string; // ISO date
+  createdAt: string; // ISO date
+}
+
+export interface AssetAssignment {
+  id: string;
+  employeeId: string;
+  assetId: string;
+  assignedAt: string; // ISO
+}
+
+export interface ListEmployeesResponse { items: Employee[] }
+export interface ListAssetsResponse { items: SystemAsset[] }
+export interface ListAssignmentsResponse { items: AssetAssignment[] }
