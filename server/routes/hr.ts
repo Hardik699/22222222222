@@ -172,9 +172,11 @@ const upsertAssetsBatch: RequestHandler = async (req, res, next) => {
   try {
     const items: SystemAsset[] = Array.isArray(req.body?.items) ? req.body.items : [];
     for (const a of items) {
+      const meta = { ...a } as any;
+      delete meta.id; delete meta.category; delete meta.serialNumber; delete meta.vendorName; delete meta.companyName; delete meta.purchaseDate; delete meta.warrantyEndDate; delete meta.createdAt;
       await pool.query(
-        `INSERT INTO system_assets (id, category, serial_number, vendor_name, company_name, purchase_date, warranty_end_date, created_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        `INSERT INTO system_assets (id, category, serial_number, vendor_name, company_name, purchase_date, warranty_end_date, metadata, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
          ON CONFLICT (id) DO UPDATE SET
            category = EXCLUDED.category,
            serial_number = EXCLUDED.serial_number,
@@ -182,6 +184,7 @@ const upsertAssetsBatch: RequestHandler = async (req, res, next) => {
            company_name = EXCLUDED.company_name,
            purchase_date = EXCLUDED.purchase_date,
            warranty_end_date = EXCLUDED.warranty_end_date,
+           metadata = EXCLUDED.metadata,
            created_at = LEAST(system_assets.created_at, EXCLUDED.created_at)`,
         [
           a.id,
@@ -191,6 +194,7 @@ const upsertAssetsBatch: RequestHandler = async (req, res, next) => {
           a.companyName ?? null,
           a.purchaseDate.slice(0,10),
           a.warrantyEndDate.slice(0,10),
+          JSON.stringify(meta),
           a.createdAt,
         ],
       );
