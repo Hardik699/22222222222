@@ -1,10 +1,10 @@
 import { Pool } from "pg";
 import type { SalaryRecord, SalaryDocument } from "@shared/api";
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL = process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL;
 if (!DATABASE_URL) {
   throw new Error(
-    "DATABASE_URL is not set. To use the Postgres store, configure your Neon connection string in the environment.",
+    "DATABASE_URL/NETLIFY_DATABASE_URL is not set. Configure your Neon connection string in the environment.",
   );
 }
 
