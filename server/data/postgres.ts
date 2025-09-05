@@ -73,6 +73,13 @@ async function init() {
       assigned_at TIMESTAMPTZ NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS it_accounts (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT,
+      payload JSONB NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_assets_category ON system_assets(category);
     CREATE INDEX IF NOT EXISTS idx_assign_emp ON asset_assignments(employee_id);
     CREATE INDEX IF NOT EXISTS idx_assign_asset ON asset_assignments(asset_id);
