@@ -38,6 +38,11 @@ export function createServer() {
   // Salaries API
   app.use("/api/salaries", salariesRouter());
 
+  // HR/IT API (DB-backed)
+  if (HAS_DB) {
+    app.use("/api/hr", hrRouter());
+  }
+
   // One-time migration (file store -> Postgres/Neon)
   if (HAS_DB) {
     app.post("/api/migrate-to-postgres", requireAdmin, async (req, res, next) => {
