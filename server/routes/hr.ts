@@ -190,6 +190,8 @@ export function hrRouter(): Router {
   const router = express.Router();
   router.post("/seed-demo", requireAdmin, seedDemo);
   router.get("/employees", listEmployees);
+  router.post("/employees", requireAdmin, createEmployee);
+  router.put("/employees/:id", requireAdmin, updateEmployee);
   router.get("/assets", listAssets);
   router.get("/assignments", listAssignments);
   return router;
