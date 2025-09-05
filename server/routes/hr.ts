@@ -246,9 +246,24 @@ export async function seedDemoDirect(count = 10) {
   await seedDemo(req as any, res as any, next as any);
 }
 
+const wipeAll: RequestHandler = async (_req, res, next) => {
+  try {
+    await pool.query('BEGIN');
+    await pool.query('TRUNCATE TABLE asset_assignments RESTART IDENTITY CASCADE');
+    await pool.query('TRUNCATE TABLE it_accounts RESTART IDENTITY CASCADE');
+    await pool.query('TRUNCATE TABLE employees RESTART IDENTITY CASCADE');
+    await pool.query('COMMIT');
+    res.json({ ok: true });
+  } catch (err) {
+    await pool.query('ROLLBACK');
+    next(err);
+  }
+};
+
 export function hrRouter(): Router {
   const router = express.Router();
   router.post("/seed-demo", requireAdmin, seedDemo);
+  router.post("/admin/wipe", requireAdmin, wipeAll);
   router.get("/employees", listEmployees);
   router.post("/employees", requireAdmin, createEmployee);
   router.put("/employees/:id", requireAdmin, updateEmployee);
