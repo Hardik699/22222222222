@@ -41,6 +41,11 @@ export function createServer() {
   // HR/IT API (DB-backed)
   if (HAS_DB) {
     app.use("/api/hr", hrRouter());
+
+    if (process.env.AUTO_SEED_DEMO === "1") {
+      // Fire and forget seeding; safe if already present
+      import("./routes/hr").then((m) => m.seedDemoDirect?.(10)).catch(() => {});
+    }
   }
 
   // One-time migration (file store -> Postgres/Neon)
