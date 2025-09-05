@@ -118,6 +118,13 @@ const listAssignments: RequestHandler = async (_req, res) => {
   res.json(resp);
 };
 
+export async function seedDemoDirect(count = 10) {
+  const req = { query: { count } } as any;
+  const res = { json: (_: any) => _ } as any;
+  const next = (err?: any) => { if (err) throw err; };
+  await seedDemo(req as any, res as any, next as any);
+}
+
 export function hrRouter(): Router {
   const router = express.Router();
   router.post("/seed-demo", requireAdmin, seedDemo);
