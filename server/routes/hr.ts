@@ -12,18 +12,30 @@ import type {
   ListAssignmentsResponse,
 } from "@shared/api";
 
-const DEPARTMENTS = ["Engineering", "HR", "Sales", "Marketing", "Finance", "Operations"];
+const DEPARTMENTS = [
+  "Engineering",
+  "HR",
+  "Sales",
+  "Marketing",
+  "Finance",
+  "Operations",
+];
 const CATEGORIES = ["mouse", "keyboard", "monitor", "headphone", "camera"];
 
-const randomFrom = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
+const randomFrom = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
 export const seedDemo: RequestHandler = async (req, res, next) => {
   try {
     const count = Math.max(1, Math.min(100, Number(req.query.count) || 10));
 
-    const { rows: existing } = await pool.query("SELECT COUNT(*)::int AS c FROM employees");
+    const { rows: existing } = await pool.query(
+      "SELECT COUNT(*)::int AS c FROM employees",
+    );
     if (existing[0]?.c >= count) {
-      return res.json({ message: "Employees already present; skipping seed", employees: existing[0].c });
+      return res.json({
+        message: "Employees already present; skipping seed",
+        employees: existing[0].c,
+      });
     }
 
     const nowIso = new Date().toISOString();
@@ -69,14 +81,20 @@ export const seedDemo: RequestHandler = async (req, res, next) => {
       }
     }
 
-    res.json({ message: "Seeded demo employees and gadgets", employees: count, gadgetsPerEmployee: CATEGORIES.length });
+    res.json({
+      message: "Seeded demo employees and gadgets",
+      employees: count,
+      gadgetsPerEmployee: CATEGORIES.length,
+    });
   } catch (err) {
     next(err);
   }
 };
 
 const listEmployees: RequestHandler = async (_req, res) => {
-  const { rows } = await pool.query("SELECT * FROM employees ORDER BY created_at DESC");
+  const { rows } = await pool.query(
+    "SELECT * FROM employees ORDER BY created_at DESC",
+  );
   const items: Employee[] = rows.map((r: any) => {
     const base: Employee = {
       id: r.id,
@@ -88,7 +106,13 @@ const listEmployees: RequestHandler = async (_req, res) => {
       createdAt: new Date(r.created_at).toISOString(),
     } as any;
     if (r.profile && typeof r.profile === "object") {
-      return { ...r.profile, id: r.id, status: r.status, department: r.department, tableNumber: r.table_number || undefined };
+      return {
+        ...r.profile,
+        id: r.id,
+        status: r.status,
+        department: r.department,
+        tableNumber: r.table_number || undefined,
+      };
     }
     return base;
   });
@@ -116,7 +140,16 @@ const createEmployee: RequestHandler = async (req, res, next) => {
          status = EXCLUDED.status,
          table_number = EXCLUDED.table_number,
          profile = EXCLUDED.profile`,
-      [id, fullName, email, department, status, tableNumber, JSON.stringify(full), createdAt],
+      [
+        id,
+        fullName,
+        email,
+        department,
+        status,
+        tableNumber,
+        JSON.stringify(full),
+        createdAt,
+      ],
     );
     res.status(201).json({ id });
   } catch (err) {
@@ -143,7 +176,15 @@ const updateEmployee: RequestHandler = async (req, res, next) => {
          table_number = COALESCE($6, table_number),
          profile = COALESCE($7, profile)
        WHERE id = $1`,
-      [id, fullName, email, department, status, tableNumber, JSON.stringify(full)],
+      [
+        id,
+        fullName,
+        email,
+        department,
+        status,
+        tableNumber,
+        JSON.stringify(full),
+      ],
     );
     res.json({ id });
   } catch (err) {
@@ -152,15 +193,17 @@ const updateEmployee: RequestHandler = async (req, res, next) => {
 };
 
 const listAssets: RequestHandler = async (_req, res) => {
-  const { rows } = await pool.query("SELECT * FROM system_assets ORDER BY created_at DESC");
+  const { rows } = await pool.query(
+    "SELECT * FROM system_assets ORDER BY created_at DESC",
+  );
   const items: any[] = rows.map((r: any) => ({
     id: r.id,
     category: r.category,
     serialNumber: r.serial_number,
     vendorName: r.vendor_name,
     companyName: r.company_name || undefined,
-    purchaseDate: new Date(r.purchase_date).toISOString().slice(0,10),
-    warrantyEndDate: new Date(r.warranty_end_date).toISOString().slice(0,10),
+    purchaseDate: new Date(r.purchase_date).toISOString().slice(0, 10),
+    warrantyEndDate: new Date(r.warranty_end_date).toISOString().slice(0, 10),
     createdAt: new Date(r.created_at).toISOString(),
     ...(r.metadata || {}),
   }));
@@ -170,10 +213,19 @@ const listAssets: RequestHandler = async (_req, res) => {
 
 const upsertAssetsBatch: RequestHandler = async (req, res, next) => {
   try {
-    const items: SystemAsset[] = Array.isArray(req.body?.items) ? req.body.items : [];
+    const items: SystemAsset[] = Array.isArray(req.body?.items)
+      ? req.body.items
+      : [];
     for (const a of items) {
       const meta = { ...a } as any;
-      delete meta.id; delete meta.category; delete meta.serialNumber; delete meta.vendorName; delete meta.companyName; delete meta.purchaseDate; delete meta.warrantyEndDate; delete meta.createdAt;
+      delete meta.id;
+      delete meta.category;
+      delete meta.serialNumber;
+      delete meta.vendorName;
+      delete meta.companyName;
+      delete meta.purchaseDate;
+      delete meta.warrantyEndDate;
+      delete meta.createdAt;
       await pool.query(
         `INSERT INTO system_assets (id, category, serial_number, vendor_name, company_name, purchase_date, warranty_end_date, metadata, created_at)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -192,8 +244,8 @@ const upsertAssetsBatch: RequestHandler = async (req, res, next) => {
           a.serialNumber,
           a.vendorName,
           a.companyName ?? null,
-          a.purchaseDate.slice(0,10),
-          a.warrantyEndDate.slice(0,10),
+          a.purchaseDate.slice(0, 10),
+          a.warrantyEndDate.slice(0, 10),
           JSON.stringify(meta),
           a.createdAt,
         ],
@@ -206,8 +258,17 @@ const upsertAssetsBatch: RequestHandler = async (req, res, next) => {
 };
 
 const listItAccounts: RequestHandler = async (_req, res) => {
-  const { rows } = await pool.query("SELECT * FROM it_accounts ORDER BY created_at DESC");
-  res.json({ items: rows.map((r: any) => ({ id: r.id, employeeId: r.employee_id, ...r.payload, createdAt: r.created_at })) });
+  const { rows } = await pool.query(
+    "SELECT * FROM it_accounts ORDER BY created_at DESC",
+  );
+  res.json({
+    items: rows.map((r: any) => ({
+      id: r.id,
+      employeeId: r.employee_id,
+      ...r.payload,
+      createdAt: r.created_at,
+    })),
+  });
 };
 
 const createItAccount: RequestHandler = async (req, res, next) => {
@@ -228,7 +289,9 @@ const createItAccount: RequestHandler = async (req, res, next) => {
 };
 
 const listAssignments: RequestHandler = async (_req, res) => {
-  const { rows } = await pool.query("SELECT * FROM asset_assignments ORDER BY assigned_at DESC");
+  const { rows } = await pool.query(
+    "SELECT * FROM asset_assignments ORDER BY assigned_at DESC",
+  );
   const items: AssetAssignment[] = rows.map((r: any) => ({
     id: r.id,
     employeeId: r.employee_id,
@@ -275,33 +338,39 @@ const upsertPcLaptopsBatch: RequestHandler = async (req, res, next) => {
 export async function seedDemoDirect(count = 10) {
   const req = { query: { count } } as any;
   const res = { json: (_: any) => _ } as any;
-  const next = (err?: any) => { if (err) throw err; };
+  const next = (err?: any) => {
+    if (err) throw err;
+  };
   await seedDemo(req as any, res as any, next as any);
 }
 
 const wipeAll: RequestHandler = async (_req, res, next) => {
   try {
-    await pool.query('BEGIN');
-    await pool.query('TRUNCATE TABLE asset_assignments RESTART IDENTITY CASCADE');
-    await pool.query('TRUNCATE TABLE it_accounts RESTART IDENTITY CASCADE');
-    await pool.query('TRUNCATE TABLE employees RESTART IDENTITY CASCADE');
-    await pool.query('COMMIT');
+    await pool.query("BEGIN");
+    await pool.query(
+      "TRUNCATE TABLE asset_assignments RESTART IDENTITY CASCADE",
+    );
+    await pool.query("TRUNCATE TABLE it_accounts RESTART IDENTITY CASCADE");
+    await pool.query("TRUNCATE TABLE employees RESTART IDENTITY CASCADE");
+    await pool.query("COMMIT");
     res.json({ ok: true });
   } catch (err) {
-    await pool.query('ROLLBACK');
+    await pool.query("ROLLBACK");
     next(err);
   }
 };
 
 export async function wipeDirect() {
-  await pool.query('BEGIN');
+  await pool.query("BEGIN");
   try {
-    await pool.query('TRUNCATE TABLE asset_assignments RESTART IDENTITY CASCADE');
-    await pool.query('TRUNCATE TABLE it_accounts RESTART IDENTITY CASCADE');
-    await pool.query('TRUNCATE TABLE employees RESTART IDENTITY CASCADE');
-    await pool.query('COMMIT');
+    await pool.query(
+      "TRUNCATE TABLE asset_assignments RESTART IDENTITY CASCADE",
+    );
+    await pool.query("TRUNCATE TABLE it_accounts RESTART IDENTITY CASCADE");
+    await pool.query("TRUNCATE TABLE employees RESTART IDENTITY CASCADE");
+    await pool.query("COMMIT");
   } catch (e) {
-    await pool.query('ROLLBACK');
+    await pool.query("ROLLBACK");
     throw e;
   }
 }

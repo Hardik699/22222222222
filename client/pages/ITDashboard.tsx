@@ -230,9 +230,9 @@ export default function ITDashboard() {
     setRecords(next);
     localStorage.setItem("itAccounts", JSON.stringify(next));
     // sync to DB
-    fetch('/api/hr/it-accounts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-role': 'admin' },
+    fetch("/api/hr/it-accounts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-role": "admin" },
       body: JSON.stringify(rec),
     }).catch(() => {});
     // mark pending notification processed

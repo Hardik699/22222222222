@@ -95,6 +95,12 @@ export interface AssetAssignment {
   assignedAt: string; // ISO
 }
 
-export interface ListEmployeesResponse { items: Employee[] }
-export interface ListAssetsResponse { items: SystemAsset[] }
-export interface ListAssignmentsResponse { items: AssetAssignment[] }
+export interface ListEmployeesResponse {
+  items: Employee[];
+}
+export interface ListAssetsResponse {
+  items: SystemAsset[];
+}
+export interface ListAssignmentsResponse {
+  items: AssetAssignment[];
+}

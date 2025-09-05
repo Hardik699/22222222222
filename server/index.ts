@@ -43,9 +43,13 @@ export function createServer() {
     app.use("/api/hr", hrRouter());
 
     if (process.env.AUTO_WIPE_IT_HR === "1") {
-      import("./routes/hr").then(async (m) => {
-        try { await m.wipeDirect?.(); } catch {}
-      }).catch(() => {});
+      import("./routes/hr")
+        .then(async (m) => {
+          try {
+            await m.wipeDirect?.();
+          } catch {}
+        })
+        .catch(() => {});
     }
 
     if (process.env.AUTO_SEED_DEMO === "1") {
@@ -55,14 +59,18 @@ export function createServer() {
 
   // One-time migration (file store -> Postgres/Neon)
   if (HAS_DB) {
-    app.post("/api/migrate-to-postgres", requireAdmin, async (req, res, next) => {
-      try {
-        const mod = await import("./routes/migrate");
-        return mod.migrateSalariesToPostgres(req, res, next);
-      } catch (err) {
-        next(err);
-      }
-    });
+    app.post(
+      "/api/migrate-to-postgres",
+      requireAdmin,
+      async (req, res, next) => {
+        try {
+          const mod = await import("./routes/migrate");
+          return mod.migrateSalariesToPostgres(req, res, next);
+        } catch (err) {
+          next(err);
+        }
+      },
+    );
   }
 
   // Google Sheets integration (admin only recommended on client)

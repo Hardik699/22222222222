@@ -1,7 +1,9 @@
 import * as fileStore from "./store";
 
 let selected: any = fileStore;
-const HAS_DB = Boolean(process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL);
+const HAS_DB = Boolean(
+  process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL,
+);
 
 if (HAS_DB) {
   try {

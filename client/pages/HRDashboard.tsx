@@ -552,13 +552,13 @@ export default function HRDashboard() {
 
     // Sync to database (auto)
     try {
-      await fetch('/api/hr/employees', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-role': 'admin' },
+      await fetch("/api/hr/employees", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-role": "admin" },
         body: JSON.stringify(employee),
       });
     } catch (err) {
-      console.warn('Failed to sync employee to DB', err);
+      console.warn("Failed to sync employee to DB", err);
     }
 
     // Add notification for IT department
@@ -1277,51 +1277,53 @@ Generated on: ${new Date().toLocaleString()}
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/hr/employees', { headers: { 'x-role': 'admin' }});
+        const res = await fetch("/api/hr/employees", {
+          headers: { "x-role": "admin" },
+        });
         if (!res.ok) return;
         const data = await res.json();
         if (Array.isArray(data.items) && data.items.length) {
           const mapped = data.items.map((e: any) => ({
             id: e.id || Date.now().toString(),
-            employeeId: e.employeeId || `EMP${(e.id || '').slice(-4)}`,
-            fullName: e.fullName || 'Unknown',
-            fatherName: e.fatherName || '',
-            motherName: e.motherName || '',
-            birthDate: e.birthDate || '',
-            bloodGroup: e.bloodGroup || '',
-            mobileNumber: e.mobileNumber || '',
-            emergencyMobileNumber: e.emergencyMobileNumber || '',
-            alternativeMobileNumber: e.alternativeMobileNumber || '',
-            email: e.email || '',
-            address: e.address || '',
-            permanentAddress: e.permanentAddress || '',
-            photo: e.photo || '',
-            joiningDate: e.joiningDate || '',
-            department: e.department || 'General',
-            position: e.position || '',
-            tableNumber: e.tableNumber || '',
-            accountNumber: e.accountNumber || '',
-            ifscCode: e.ifscCode || '',
-            bankPassbook: e.bankPassbook || '',
-            aadhaarNumber: e.aadhaarNumber || '',
-            panNumber: e.panNumber || '',
-            uanNumber: e.uanNumber || '',
-            salary: e.salary || '',
-            aadhaarCard: e.aadhaarCard || '',
-            panCard: e.panCard || '',
-            passport: e.passport || '',
-            drivingLicense: e.drivingLicense || '',
-            resume: e.resume || '',
-            medicalCertificate: e.medicalCertificate || '',
-            educationCertificate: e.educationCertificate || '',
-            experienceLetter: e.experienceLetter || '',
-            status: e.status || 'active',
+            employeeId: e.employeeId || `EMP${(e.id || "").slice(-4)}`,
+            fullName: e.fullName || "Unknown",
+            fatherName: e.fatherName || "",
+            motherName: e.motherName || "",
+            birthDate: e.birthDate || "",
+            bloodGroup: e.bloodGroup || "",
+            mobileNumber: e.mobileNumber || "",
+            emergencyMobileNumber: e.emergencyMobileNumber || "",
+            alternativeMobileNumber: e.alternativeMobileNumber || "",
+            email: e.email || "",
+            address: e.address || "",
+            permanentAddress: e.permanentAddress || "",
+            photo: e.photo || "",
+            joiningDate: e.joiningDate || "",
+            department: e.department || "General",
+            position: e.position || "",
+            tableNumber: e.tableNumber || "",
+            accountNumber: e.accountNumber || "",
+            ifscCode: e.ifscCode || "",
+            bankPassbook: e.bankPassbook || "",
+            aadhaarNumber: e.aadhaarNumber || "",
+            panNumber: e.panNumber || "",
+            uanNumber: e.uanNumber || "",
+            salary: e.salary || "",
+            aadhaarCard: e.aadhaarCard || "",
+            panCard: e.panCard || "",
+            passport: e.passport || "",
+            drivingLicense: e.drivingLicense || "",
+            resume: e.resume || "",
+            medicalCertificate: e.medicalCertificate || "",
+            educationCertificate: e.educationCertificate || "",
+            experienceLetter: e.experienceLetter || "",
+            status: e.status || "active",
             deactivationReason: e.deactivationReason,
             resignationLetter: e.resignationLetter,
             deactivationDate: e.deactivationDate,
           }));
           setEmployees(mapped);
-          localStorage.setItem('hrEmployees', JSON.stringify(mapped));
+          localStorage.setItem("hrEmployees", JSON.stringify(mapped));
         }
       } catch {}
     };

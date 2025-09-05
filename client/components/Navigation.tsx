@@ -42,30 +42,49 @@ export default function AppNav() {
     if (syncing) return;
     setSyncing(true);
     try {
-      const headers = { 'Content-Type': 'application/json', 'x-role': 'admin' } as const;
-      const sysRaw = localStorage.getItem('systemAssets');
+      const headers = {
+        "Content-Type": "application/json",
+        "x-role": "admin",
+      } as const;
+      const sysRaw = localStorage.getItem("systemAssets");
       const sys = sysRaw ? JSON.parse(sysRaw) : [];
       if (Array.isArray(sys) && sys.length) {
-        await fetch('/api/hr/assets/upsert-batch', { method: 'POST', headers, body: JSON.stringify({ items: sys }) });
+        await fetch("/api/hr/assets/upsert-batch", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ items: sys }),
+        });
       }
-      const itRaw = localStorage.getItem('itAccounts');
+      const itRaw = localStorage.getItem("itAccounts");
       const it = itRaw ? JSON.parse(itRaw) : [];
       if (Array.isArray(it)) {
         for (const rec of it) {
-          await fetch('/api/hr/it-accounts', { method: 'POST', headers, body: JSON.stringify(rec) });
+          await fetch("/api/hr/it-accounts", {
+            method: "POST",
+            headers,
+            body: JSON.stringify(rec),
+          });
         }
       }
-      const empRaw = localStorage.getItem('hrEmployees');
+      const empRaw = localStorage.getItem("hrEmployees");
       const emps = empRaw ? JSON.parse(empRaw) : [];
       if (Array.isArray(emps)) {
         for (const e of emps) {
-          await fetch('/api/hr/employees', { method: 'POST', headers, body: JSON.stringify(e) });
+          await fetch("/api/hr/employees", {
+            method: "POST",
+            headers,
+            body: JSON.stringify(e),
+          });
         }
       }
-      const pcRaw = localStorage.getItem('pcLaptopAssets');
+      const pcRaw = localStorage.getItem("pcLaptopAssets");
       const pcs = pcRaw ? JSON.parse(pcRaw) : [];
       if (Array.isArray(pcs) && pcs.length) {
-        await fetch('/api/hr/pc-laptops/upsert-batch', { method: 'POST', headers, body: JSON.stringify({ items: pcs }) });
+        await fetch("/api/hr/pc-laptops/upsert-batch", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ items: pcs }),
+        });
       }
       setLastSync(new Date().toLocaleTimeString());
     } catch (e) {
@@ -197,11 +216,13 @@ export default function AppNav() {
                       size="sm"
                       onClick={syncAll}
                       disabled={syncing}
-                      title={lastSync ? `Last sync: ${lastSync}` : 'Sync to DB'}
+                      title={lastSync ? `Last sync: ${lastSync}` : "Sync to DB"}
                       className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-300"
                     >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
-                      {syncing ? 'Syncing' : 'Sync'}
+                      <RefreshCw
+                        className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`}
+                      />
+                      {syncing ? "Syncing" : "Sync"}
                     </Button>
                   </>
                 )}
