@@ -25,6 +25,7 @@ import {
   Building2,
   LayoutDashboard,
   Database,
+  RefreshCw,
 } from "lucide-react";
 
 export default function AppNav() {
