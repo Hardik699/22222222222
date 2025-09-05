@@ -63,8 +63,11 @@ async function init() {
       company_name TEXT,
       purchase_date DATE NOT NULL,
       warranty_end_date DATE NOT NULL,
+      metadata JSONB,
       created_at TIMESTAMPTZ NOT NULL
     );
+
+    ALTER TABLE system_assets ADD COLUMN IF NOT EXISTS metadata JSONB;
 
     CREATE TABLE IF NOT EXISTS asset_assignments (
       id TEXT PRIMARY KEY,
