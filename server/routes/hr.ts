@@ -167,6 +167,61 @@ const listAssets: RequestHandler = async (_req, res) => {
   res.json(resp);
 };
 
+const upsertAssetsBatch: RequestHandler = async (req, res, next) => {
+  try {
+    const items: SystemAsset[] = Array.isArray(req.body?.items) ? req.body.items : [];
+    for (const a of items) {
+      await pool.query(
+        `INSERT INTO system_assets (id, category, serial_number, vendor_name, company_name, purchase_date, warranty_end_date, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+         ON CONFLICT (id) DO UPDATE SET
+           category = EXCLUDED.category,
+           serial_number = EXCLUDED.serial_number,
+           vendor_name = EXCLUDED.vendor_name,
+           company_name = EXCLUDED.company_name,
+           purchase_date = EXCLUDED.purchase_date,
+           warranty_end_date = EXCLUDED.warranty_end_date,
+           created_at = LEAST(system_assets.created_at, EXCLUDED.created_at)`,
+        [
+          a.id,
+          a.category,
+          a.serialNumber,
+          a.vendorName,
+          a.companyName ?? null,
+          a.purchaseDate.slice(0,10),
+          a.warrantyEndDate.slice(0,10),
+          a.createdAt,
+        ],
+      );
+    }
+    res.json({ upserted: items.length });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const listItAccounts: RequestHandler = async (_req, res) => {
+  const { rows } = await pool.query("SELECT * FROM it_accounts ORDER BY created_at DESC");
+  res.json({ items: rows.map((r: any) => ({ id: r.id, employeeId: r.employee_id, ...r.payload, createdAt: r.created_at })) });
+};
+
+const createItAccount: RequestHandler = async (req, res, next) => {
+  try {
+    const id = req.body?.id || nanoid(12);
+    const empId = req.body?.employeeId || null;
+    const now = new Date().toISOString();
+    await pool.query(
+      `INSERT INTO it_accounts (id, employee_id, payload, created_at)
+       VALUES ($1,$2,$3,$4)
+       ON CONFLICT (id) DO UPDATE SET employee_id = EXCLUDED.employee_id, payload = EXCLUDED.payload`,
+      [id, empId, JSON.stringify(req.body || {}), now],
+    );
+    res.status(201).json({ id });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const listAssignments: RequestHandler = async (_req, res) => {
   const { rows } = await pool.query("SELECT * FROM asset_assignments ORDER BY assigned_at DESC");
   const items: AssetAssignment[] = rows.map((r: any) => ({
