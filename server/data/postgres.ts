@@ -8,7 +8,7 @@ if (!DATABASE_URL) {
   );
 }
 
-const pool = new Pool({
+export const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: { rejectUnauthorized: false },
 });
@@ -40,6 +40,39 @@ async function init() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_salary_documents_salary_id ON salary_documents(salary_id);
+
+    -- HR / IT tables
+    CREATE TABLE IF NOT EXISTS employees (
+      id TEXT PRIMARY KEY,
+      full_name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      department TEXT NOT NULL,
+      status TEXT NOT NULL,
+      table_number TEXT,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS system_assets (
+      id TEXT PRIMARY KEY,
+      category TEXT NOT NULL,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      company_name TEXT,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS asset_assignments (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+      asset_id TEXT NOT NULL REFERENCES system_assets(id) ON DELETE CASCADE,
+      assigned_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_assets_category ON system_assets(category);
+    CREATE INDEX IF NOT EXISTS idx_assign_emp ON asset_assignments(employee_id);
+    CREATE INDEX IF NOT EXISTS idx_assign_asset ON asset_assignments(asset_id);
   `);
 }
 
