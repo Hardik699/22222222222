@@ -260,6 +260,19 @@ const wipeAll: RequestHandler = async (_req, res, next) => {
   }
 };
 
+export async function wipeDirect() {
+  await pool.query('BEGIN');
+  try {
+    await pool.query('TRUNCATE TABLE asset_assignments RESTART IDENTITY CASCADE');
+    await pool.query('TRUNCATE TABLE it_accounts RESTART IDENTITY CASCADE');
+    await pool.query('TRUNCATE TABLE employees RESTART IDENTITY CASCADE');
+    await pool.query('COMMIT');
+  } catch (e) {
+    await pool.query('ROLLBACK');
+    throw e;
+  }
+}
+
 export function hrRouter(): Router {
   const router = express.Router();
   router.post("/seed-demo", requireAdmin, seedDemo);
