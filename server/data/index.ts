@@ -4,7 +4,7 @@ import { createRequire } from "module";
 const requireCjs = createRequire(import.meta.url);
 
 let selected: any = fileStore;
-if (process.env.DATABASE_URL) {
+if (process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const pgStore = requireCjs("./postgres");
