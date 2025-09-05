@@ -153,7 +153,7 @@ const updateEmployee: RequestHandler = async (req, res, next) => {
 
 const listAssets: RequestHandler = async (_req, res) => {
   const { rows } = await pool.query("SELECT * FROM system_assets ORDER BY created_at DESC");
-  const items: SystemAsset[] = rows.map((r: any) => ({
+  const items: any[] = rows.map((r: any) => ({
     id: r.id,
     category: r.category,
     serialNumber: r.serial_number,
@@ -162,6 +162,7 @@ const listAssets: RequestHandler = async (_req, res) => {
     purchaseDate: new Date(r.purchase_date).toISOString().slice(0,10),
     warrantyEndDate: new Date(r.warranty_end_date).toISOString().slice(0,10),
     createdAt: new Date(r.created_at).toISOString(),
+    ...(r.metadata || {}),
   }));
   const resp: ListAssetsResponse = { items };
   res.json(resp);
