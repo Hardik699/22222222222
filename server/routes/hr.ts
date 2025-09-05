@@ -77,17 +77,78 @@ export const seedDemo: RequestHandler = async (req, res, next) => {
 
 const listEmployees: RequestHandler = async (_req, res) => {
   const { rows } = await pool.query("SELECT * FROM employees ORDER BY created_at DESC");
-  const items: Employee[] = rows.map((r: any) => ({
-    id: r.id,
-    fullName: r.full_name,
-    email: r.email,
-    department: r.department,
-    status: r.status,
-    tableNumber: r.table_number || undefined,
-    createdAt: new Date(r.created_at).toISOString(),
-  }));
+  const items: Employee[] = rows.map((r: any) => {
+    const base: Employee = {
+      id: r.id,
+      fullName: r.full_name,
+      email: r.email,
+      department: r.department,
+      status: r.status,
+      tableNumber: r.table_number || undefined,
+      createdAt: new Date(r.created_at).toISOString(),
+    } as any;
+    if (r.profile && typeof r.profile === "object") {
+      return { ...r.profile, id: r.id, status: r.status, department: r.department, tableNumber: r.table_number || undefined };
+    }
+    return base;
+  });
   const resp: ListEmployeesResponse = { items };
   res.json(resp);
+};
+
+const createEmployee: RequestHandler = async (req, res, next) => {
+  try {
+    const id = req.body?.id || nanoid(12);
+    const full = req.body || {};
+    const fullName = full.fullName || full.name || "Unnamed";
+    const email = full.email || `${id}@example.com`;
+    const department = full.department || "General";
+    const status = full.status || "active";
+    const tableNumber = full.tableNumber || null;
+    const createdAt = new Date().toISOString();
+    await pool.query(
+      `INSERT INTO employees (id, full_name, email, department, status, table_number, profile, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+       ON CONFLICT (id) DO UPDATE SET
+         full_name = EXCLUDED.full_name,
+         email = EXCLUDED.email,
+         department = EXCLUDED.department,
+         status = EXCLUDED.status,
+         table_number = EXCLUDED.table_number,
+         profile = EXCLUDED.profile`,
+      [id, fullName, email, department, status, tableNumber, JSON.stringify(full), createdAt],
+    );
+    res.status(201).json({ id });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateEmployee: RequestHandler = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const full = req.body || {};
+    const fullName = full.fullName || null;
+    const email = full.email || null;
+    const department = full.department || null;
+    const status = full.status || null;
+    const tableNumber = full.tableNumber || null;
+
+    await pool.query(
+      `UPDATE employees SET
+         full_name = COALESCE($2, full_name),
+         email = COALESCE($3, email),
+         department = COALESCE($4, department),
+         status = COALESCE($5, status),
+         table_number = COALESCE($6, table_number),
+         profile = COALESCE($7, profile)
+       WHERE id = $1`,
+      [id, fullName, email, department, status, tableNumber, JSON.stringify(full)],
+    );
+    res.json({ id });
+  } catch (err) {
+    next(err);
+  }
 };
 
 const listAssets: RequestHandler = async (_req, res) => {
