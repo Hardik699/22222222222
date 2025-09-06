@@ -380,6 +380,41 @@ const listAssignments: RequestHandler = async (_req, res) => {
   res.json(resp);
 };
 
+const backfillAssetCategories: RequestHandler = async (_req, res, next) => {
+  try {
+    const { rows } = await pool.query("SELECT id, category, serial_number, vendor_name, purchase_date, warranty_end_date, metadata, created_at FROM system_assets");
+    let count = 0;
+    for (const r of rows as any[]) {
+      const t = getCategoryTable(r.category);
+      if (!t) continue;
+      await pool.query(
+        `INSERT INTO ${t} (id, serial_number, vendor_name, purchase_date, warranty_end_date, metadata, created_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)
+         ON CONFLICT (id) DO UPDATE SET
+           serial_number = EXCLUDED.serial_number,
+           vendor_name = EXCLUDED.vendor_name,
+           purchase_date = EXCLUDED.purchase_date,
+           warranty_end_date = EXCLUDED.warranty_end_date,
+           metadata = EXCLUDED.metadata,
+           created_at = LEAST(${t}.created_at, EXCLUDED.created_at)`,
+        [
+          r.id,
+          r.serial_number,
+          r.vendor_name,
+          new Date(r.purchase_date).toISOString().slice(0, 10),
+          new Date(r.warranty_end_date).toISOString().slice(0, 10),
+          r.metadata ? JSON.stringify(r.metadata) : null,
+          new Date(r.created_at).toISOString(),
+        ],
+      );
+      count++;
+    }
+    res.json({ ok: true, mirrored: count });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const upsertPcLaptopsBatch: RequestHandler = async (req, res, next) => {
   try {
     const items: any[] = Array.isArray(req.body?.items) ? req.body.items : [];
