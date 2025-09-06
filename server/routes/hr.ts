@@ -20,7 +20,32 @@ const DEPARTMENTS = [
   "Finance",
   "Operations",
 ];
-const CATEGORIES = ["mouse", "keyboard", "monitor", "headphone", "camera"];
+const CATEGORIES = ["mouse", "keyboard", "monitor", "headphone", "camera"]; // primary demo categories
+
+function getCategoryTable(cat: string): string | null {
+  switch ((cat || "").toLowerCase()) {
+    case "mouse":
+      return "mice";
+    case "keyboard":
+      return "keyboards";
+    case "monitor":
+      return "monitors";
+    case "headphone":
+      return "headphones";
+    case "camera":
+      return "cameras";
+    case "motherboard":
+      return "motherboards";
+    case "ram":
+      return "rams";
+    case "storage":
+      return "storages";
+    case "power-supply":
+      return "power_supplies";
+    default:
+      return null;
+  }
+}
 
 const randomFrom = <T>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -73,6 +98,27 @@ export const seedDemo: RequestHandler = async (req, res, next) => {
             nowIso,
           ],
         );
+        const catTable = getCategoryTable(cat);
+        if (catTable) {
+          await pool.query(
+            `INSERT INTO ${catTable} (id, serial_number, vendor_name, purchase_date, warranty_end_date, created_at)
+             VALUES ($1,$2,$3,$4,$5,$6)
+             ON CONFLICT (id) DO UPDATE SET
+               serial_number = EXCLUDED.serial_number,
+               vendor_name = EXCLUDED.vendor_name,
+               purchase_date = EXCLUDED.purchase_date,
+               warranty_end_date = EXCLUDED.warranty_end_date,
+               created_at = LEAST(${catTable}.created_at, EXCLUDED.created_at)`,
+            [
+              assetId,
+              serial,
+              vendor,
+              new Date().toISOString().slice(0, 10),
+              warrantyEnd.toISOString().slice(0, 10),
+              nowIso,
+            ],
+          );
+        }
         const assignId = nanoid(12);
         await pool.query(
           `INSERT INTO asset_assignments (id, employee_id, asset_id, assigned_at) VALUES ($1,$2,$3,$4)`,
@@ -226,6 +272,10 @@ const upsertAssetsBatch: RequestHandler = async (req, res, next) => {
       delete meta.purchaseDate;
       delete meta.warrantyEndDate;
       delete meta.createdAt;
+      const purchase = a.purchaseDate.slice(0, 10);
+      const warranty = a.warrantyEndDate.slice(0, 10);
+      const createdAt = a.createdAt;
+      // Upsert into canonical table
       await pool.query(
         `INSERT INTO system_assets (id, category, serial_number, vendor_name, company_name, purchase_date, warranty_end_date, metadata, created_at)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
@@ -244,12 +294,36 @@ const upsertAssetsBatch: RequestHandler = async (req, res, next) => {
           a.serialNumber,
           a.vendorName,
           a.companyName ?? null,
-          a.purchaseDate.slice(0, 10),
-          a.warrantyEndDate.slice(0, 10),
+          purchase,
+          warranty,
           JSON.stringify(meta),
-          a.createdAt,
+          createdAt,
         ],
       );
+      // Mirror into per-category table
+      const catTable = getCategoryTable(a.category);
+      if (catTable) {
+        await pool.query(
+          `INSERT INTO ${catTable} (id, serial_number, vendor_name, purchase_date, warranty_end_date, metadata, created_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7)
+           ON CONFLICT (id) DO UPDATE SET
+             serial_number = EXCLUDED.serial_number,
+             vendor_name = EXCLUDED.vendor_name,
+             purchase_date = EXCLUDED.purchase_date,
+             warranty_end_date = EXCLUDED.warranty_end_date,
+             metadata = EXCLUDED.metadata,
+             created_at = LEAST(${catTable}.created_at, EXCLUDED.created_at)`,
+          [
+            a.id,
+            a.serialNumber,
+            a.vendorName,
+            purchase,
+            warranty,
+            JSON.stringify(meta),
+            createdAt,
+          ],
+        );
+      }
     }
     res.json({ upserted: items.length });
   } catch (err) {
