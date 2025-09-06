@@ -38,7 +38,10 @@ export function createServer() {
   // DB health
   app.get("/api/db/health", async (_req, res) => {
     if (!HAS_DB) {
-      return res.json({ connected: false, reason: "No database URL configured" });
+      return res.json({
+        connected: false,
+        reason: "No database URL configured",
+      });
     }
     try {
       const { pool } = await import("./data/postgres");

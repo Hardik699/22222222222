@@ -37,7 +37,9 @@ export default function AppNav() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
-  const [dbStatus, setDbStatus] = useState<"unknown" | "online" | "offline">("unknown");
+  const [dbStatus, setDbStatus] = useState<"unknown" | "online" | "offline">(
+    "unknown",
+  );
 
   const syncAll = async () => {
     if (syncing) return;
@@ -234,12 +236,22 @@ export default function AppNav() {
                     </Button>
                     <div
                       className="hidden md:flex items-center px-2 py-1 rounded-md border border-slate-600 text-xs text-slate-300"
-                      title={dbStatus === "online" ? "Database connected" : dbStatus === "offline" ? "Database offline" : "Checking database"}
+                      title={
+                        dbStatus === "online"
+                          ? "Database connected"
+                          : dbStatus === "offline"
+                            ? "Database offline"
+                            : "Checking database"
+                      }
                     >
                       <span
                         className={`inline-block h-2 w-2 rounded-full mr-2 ${dbStatus === "online" ? "bg-green-500" : dbStatus === "offline" ? "bg-red-500" : "bg-yellow-500"}`}
                       />
-                      {dbStatus === "online" ? "DB Connected" : dbStatus === "offline" ? "DB Offline" : "DB Checking"}
+                      {dbStatus === "online"
+                        ? "DB Connected"
+                        : dbStatus === "offline"
+                          ? "DB Offline"
+                          : "DB Checking"}
                     </div>
                     <Button
                       variant="outline"
