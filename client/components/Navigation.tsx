@@ -107,29 +107,37 @@ export default function AppNav() {
   // DB health check
   useEffect(() => {
     let cancelled = false;
-    const check = async () => {
+    const check = () => {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5000);
-      try {
-        const url = `${window.location.origin}/api/db/health`;
-        const r = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeout);
-        if (!r.ok) {
-          const text = await r.text().catch(() => "");
+      const url = `${window.location.origin}/api/db/health`;
+      fetch(url, { signal: controller.signal })
+        .then((r) => {
+          clearTimeout(timeout);
+          if (!r.ok) {
+            return r.text().catch(() => "").then((text) => {
+              if (!cancelled) setDbStatus("offline");
+              console.debug("DB health check non-ok", r.status, text);
+            });
+          }
+          return r
+            .json()
+            .catch(() => null)
+            .then((j) => {
+              if (!cancelled) setDbStatus(j?.connected ? "online" : "offline");
+            });
+        })
+        .catch((err) => {
+          clearTimeout(timeout);
           if (!cancelled) setDbStatus("offline");
-          console.debug("DB health check non-ok", r.status, text);
-          return;
-        }
-        const j = await r.json().catch(() => null);
-        if (!cancelled) setDbStatus(j?.connected ? "online" : "offline");
-      } catch (err: any) {
-        if (!cancelled) setDbStatus("offline");
-        console.debug("DB health check failed", err?.message || err);
-      } finally {
-        clearTimeout(timeout);
-      }
+          console.debug("DB health check failed (caught)", err?.message || err);
+        });
     };
-    check();
+    try {
+      check();
+    } catch (err) {
+      console.debug("DB health check sync error", err);
+    }
     const id = setInterval(check, 60 * 1000);
     return () => {
       cancelled = true;
@@ -206,23 +214,25 @@ export default function AppNav() {
   };
 
   const dbHealth = async () => {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
-      const url = `${window.location.origin}/api/db/health`;
-      const r = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeout);
-      if (!r.ok) {
-        const txt = await r.text().catch(() => "");
-        alert(`Database check failed: HTTP ${r.status} ${txt}`);
-        return;
-      }
-      const j = await r.json().catch(() => null);
-      if (j?.connected) alert("Database connected");
-      else alert(`Database offline: ${j?.reason || j?.error || "Unknown"}`);
-    } catch (e: any) {
-      alert(`Database check failed: ${e?.message || "Network error"}`);
-    }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const url = `${window.location.origin}/api/db/health`;
+    fetch(url, { signal: controller.signal })
+      .then(async (r) => {
+        clearTimeout(timeout);
+        if (!r.ok) {
+          const txt = await r.text().catch(() => "");
+          alert(`Database check failed: HTTP ${r.status} ${txt}`);
+          return;
+        }
+        const j = await r.json().catch(() => null);
+        if (j?.connected) alert("Database connected");
+        else alert(`Database offline: ${j?.reason || j?.error || "Unknown"}`);
+      })
+      .catch((e) => {
+        clearTimeout(timeout);
+        alert(`Database check failed: ${e?.message || "Network error"}`);
+      });
   };
 
   return (
