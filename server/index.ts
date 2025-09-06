@@ -35,6 +35,20 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  // DB health
+  app.get("/api/db/health", async (_req, res) => {
+    if (!HAS_DB) {
+      return res.json({ connected: false, reason: "No database URL configured" });
+    }
+    try {
+      const { pool } = await import("./data/postgres");
+      await pool.query("SELECT 1");
+      res.json({ connected: true });
+    } catch (e: any) {
+      res.json({ connected: false, error: e?.message || String(e) });
+    }
+  });
+
   // Salaries API
   app.use("/api/salaries", salariesRouter());
 
