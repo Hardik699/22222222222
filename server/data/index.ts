@@ -6,16 +6,22 @@ const HAS_DB = Boolean(
 );
 
 if (HAS_DB) {
-  try {
-    const pgStore = await import("./postgres");
-    selected = pgStore;
-  } catch (err) {
-    console.error(
-      "Failed to load Postgres store, falling back to file store:",
-      err,
-    );
-    selected = fileStore;
-  }
+  import("./postgres")
+    .then((pgStore) => {
+      selected = pgStore;
+    })
+    .catch((err) => {
+      console.error(
+        "Failed to load Postgres store, falling back to file store:",
+        err,
+      );
+      selected = fileStore;
+    });
 }
 
-export const db = selected.db;
+export const db = new Proxy({} as any, {
+  get(_target, prop) {
+    const impl = (selected as any).db;
+    return (impl as any)[prop as any];
+  },
+});
