@@ -52,6 +52,27 @@ export function createServer() {
     }
   });
 
+  // Global health
+  app.get("/api/health", async (_req, res) => {
+    let db = false;
+    let dbError: string | undefined;
+    if (HAS_DB) {
+      try {
+        const { pool } = await import("./data/postgres");
+        await pool.query("SELECT 1");
+        db = true;
+      } catch (e: any) {
+        db = false;
+        dbError = e?.message || String(e);
+      }
+    }
+    const sheetsConfigured = Boolean(
+      (process.env.GOOGLE_SHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS) ||
+      (process.env.GOOGLE_SHEET_ID_HR && process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS)
+    );
+    res.json({ ok: true, db, dbError, sheetsConfigured });
+  });
+
   // Salaries API
   app.use("/api/salaries", salariesRouter());
 
