@@ -12,26 +12,25 @@ export default function DeployPage() {
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
 
-  const checkDb = async () => {
+  const checkDb = () => {
     setChecking(true);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
-    try {
-      const url = `${window.location.origin}/api/db/health`;
-      const r = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeout);
-      if (!r.ok) {
+    const url = `${window.location.origin}/api/db/health`;
+    fetch(url, { signal: controller.signal })
+      .then((r) => {
+        clearTimeout(timeout);
+        if (!r.ok) {
+          setDbStatus("offline");
+          return;
+        }
+        return r.json().catch(() => null).then((j) => setDbStatus(j?.connected ? "online" : "offline"));
+      })
+      .catch(() => {
+        clearTimeout(timeout);
         setDbStatus("offline");
-        return;
-      }
-      const j = await r.json().catch(() => null);
-      setDbStatus(j?.connected ? "online" : "offline");
-    } catch {
-      setDbStatus("offline");
-    } finally {
-      clearTimeout(timeout);
-      setChecking(false);
-    }
+      })
+      .finally(() => setChecking(false));
   };
 
   useEffect(() => {
