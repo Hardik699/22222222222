@@ -42,6 +42,10 @@ function getCategoryTable(cat: string): string | null {
       return "storages";
     case "power-supply":
       return "power_supplies";
+    case "vonage":
+      return "vonage_numbers";
+    case "vitel-global":
+      return "vitel_global_numbers";
     default:
       return null;
   }
