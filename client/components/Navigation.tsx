@@ -108,12 +108,25 @@ export default function AppNav() {
   useEffect(() => {
     let cancelled = false;
     const check = async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
       try {
-        const r = await fetch("/api/db/health");
-        const j = await r.json();
+        const url = `${window.location.origin}/api/db/health`;
+        const r = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeout);
+        if (!r.ok) {
+          const text = await r.text().catch(() => "");
+          if (!cancelled) setDbStatus("offline");
+          console.debug("DB health check non-ok", r.status, text);
+          return;
+        }
+        const j = await r.json().catch(() => null);
         if (!cancelled) setDbStatus(j?.connected ? "online" : "offline");
-      } catch {
+      } catch (err: any) {
         if (!cancelled) setDbStatus("offline");
+        console.debug("DB health check failed", err?.message || err);
+      } finally {
+        clearTimeout(timeout);
       }
     };
     check();
@@ -194,12 +207,21 @@ export default function AppNav() {
 
   const dbHealth = async () => {
     try {
-      const r = await fetch("/api/db/health");
-      const j = await r.json();
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const url = `${window.location.origin}/api/db/health`;
+      const r = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (!r.ok) {
+        const txt = await r.text().catch(() => "");
+        alert(`Database check failed: HTTP ${r.status} ${txt}`);
+        return;
+      }
+      const j = await r.json().catch(() => null);
       if (j?.connected) alert("Database connected");
       else alert(`Database offline: ${j?.reason || j?.error || "Unknown"}`);
-    } catch {
-      alert("Database check failed");
+    } catch (e: any) {
+      alert(`Database check failed: ${e?.message || "Network error"}`);
     }
   };
 
