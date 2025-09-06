@@ -115,10 +115,13 @@ export default function AppNav() {
         .then((r) => {
           clearTimeout(timeout);
           if (!r.ok) {
-            return r.text().catch(() => "").then((text) => {
-              if (!cancelled) setDbStatus("offline");
-              console.debug("DB health check non-ok", r.status, text);
-            });
+            return r
+              .text()
+              .catch(() => "")
+              .then((text) => {
+                if (!cancelled) setDbStatus("offline");
+                console.debug("DB health check non-ok", r.status, text);
+              });
           }
           return r
             .json()
@@ -196,7 +199,9 @@ export default function AppNav() {
 
   const deployNetlify = async () => {
     try {
-      alert("To deploy: use the platform’s Netlify MCP. Click ‘Connect Netlify MCP’ in the top bar and deploy.");
+      alert(
+        "To deploy: use the platform’s Netlify MCP. Click ‘Connect Netlify MCP’ in the top bar and deploy.",
+      );
     } catch {}
   };
 
@@ -207,7 +212,11 @@ export default function AppNav() {
         headers: { "Content-Type": "application/json", "x-role": "admin" },
       });
       const j = await r.json();
-      alert(j?.ok ? `Backfill done (mirrored: ${j.mirrored || 0})` : `Backfill failed`);
+      alert(
+        j?.ok
+          ? `Backfill done (mirrored: ${j.mirrored || 0})`
+          : `Backfill failed`,
+      );
     } catch (e) {
       alert("Backfill failed");
     }
@@ -352,12 +361,21 @@ export default function AppNav() {
                           Admin
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white" align="end">
-                        <DropdownMenuItem className="focus:bg-slate-700 cursor-pointer" onClick={dbHealth}>
+                      <DropdownMenuContent
+                        className="bg-slate-800 border-slate-700 text-white"
+                        align="end"
+                      >
+                        <DropdownMenuItem
+                          className="focus:bg-slate-700 cursor-pointer"
+                          onClick={dbHealth}
+                        >
                           <ServerCog className="h-4 w-4 mr-2" />
                           DB Health Check
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="focus:bg-slate-700 cursor-pointer" onClick={dbBackfill}>
+                        <DropdownMenuItem
+                          className="focus:bg-slate-700 cursor-pointer"
+                          onClick={dbBackfill}
+                        >
                           <ServerCog className="h-4 w-4 mr-2" />
                           DB Backfill Categories
                         </DropdownMenuItem>

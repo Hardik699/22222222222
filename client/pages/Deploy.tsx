@@ -24,7 +24,10 @@ export default function DeployPage() {
           setDbStatus("offline");
           return;
         }
-        return r.json().catch(() => null).then((j) => setDbStatus(j?.connected ? "online" : "offline"));
+        return r
+          .json()
+          .catch(() => null)
+          .then((j) => setDbStatus(j?.connected ? "online" : "offline"));
       })
       .catch(() => {
         clearTimeout(timeout);
@@ -46,7 +49,11 @@ export default function DeployPage() {
         headers: { "Content-Type": "application/json", "x-role": "admin" },
       });
       const j = await r.json();
-      alert(j?.ok ? `Backfill complete (mirrored: ${j.mirrored || 0})` : `Backfill failed`);
+      alert(
+        j?.ok
+          ? `Backfill complete (mirrored: ${j.mirrored || 0})`
+          : `Backfill failed`,
+      );
     } catch (e) {
       alert("Backfill failed");
     }
@@ -56,7 +63,10 @@ export default function DeployPage() {
     if (syncing) return;
     setSyncing(true);
     try {
-      const headers = { "Content-Type": "application/json", "x-role": "admin" } as const;
+      const headers = {
+        "Content-Type": "application/json",
+        "x-role": "admin",
+      } as const;
       const sysRaw = localStorage.getItem("systemAssets");
       const sys = sysRaw ? JSON.parse(sysRaw) : [];
       if (Array.isArray(sys) && sys.length) {
@@ -70,14 +80,22 @@ export default function DeployPage() {
       const it = itRaw ? JSON.parse(itRaw) : [];
       if (Array.isArray(it)) {
         for (const rec of it) {
-          await fetch("/api/hr/it-accounts", { method: "POST", headers, body: JSON.stringify(rec) });
+          await fetch("/api/hr/it-accounts", {
+            method: "POST",
+            headers,
+            body: JSON.stringify(rec),
+          });
         }
       }
       const empRaw = localStorage.getItem("hrEmployees");
       const emps = empRaw ? JSON.parse(empRaw) : [];
       if (Array.isArray(emps)) {
         for (const e of emps) {
-          await fetch("/api/hr/employees", { method: "POST", headers, body: JSON.stringify(e) });
+          await fetch("/api/hr/employees", {
+            method: "POST",
+            headers,
+            body: JSON.stringify(e),
+          });
         }
       }
       const pcRaw = localStorage.getItem("pcLaptopAssets");
@@ -100,7 +118,7 @@ export default function DeployPage() {
 
   const deployNetlify = () => {
     alert(
-      "Deployment: Click 'Open MCP popover' in the top bar, then 'Connect Netlify'. After connecting, use the Netlify MCP to deploy. In Netlify, set DATABASE_URL and NETLIFY_DATABASE_URL."
+      "Deployment: Click 'Open MCP popover' in the top bar, then 'Connect Netlify'. After connecting, use the Netlify MCP to deploy. In Netlify, set DATABASE_URL and NETLIFY_DATABASE_URL.",
     );
   };
 
@@ -108,49 +126,99 @@ export default function DeployPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-deep-900 via-blue-deep-800 to-slate-900">
       <AppNav />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3"><CloudUpload className="h-7 w-7"/>Deploy & Database</h1>
+        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <CloudUpload className="h-7 w-7" />
+          Deploy & Database
+        </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="bg-slate-900/60 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2"><Database className="h-5 w-5"/>Database</CardTitle>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Database
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-slate-300">
               <div className="flex items-center gap-2">
-                <span className={`inline-block h-2 w-2 rounded-full ${dbStatus === "online" ? "bg-green-500" : dbStatus === "offline" ? "bg-red-500" : "bg-yellow-500"}`}></span>
-                <span>Status: {dbStatus === "online" ? "Connected" : dbStatus === "offline" ? "Offline" : "Checking"}</span>
-                <Button variant="outline" size="sm" onClick={checkDb} disabled={checking} className="ml-auto border-slate-600 text-slate-300">
-                  <ServerCog className="h-4 w-4 mr-2"/>
+                <span
+                  className={`inline-block h-2 w-2 rounded-full ${dbStatus === "online" ? "bg-green-500" : dbStatus === "offline" ? "bg-red-500" : "bg-yellow-500"}`}
+                ></span>
+                <span>
+                  Status:{" "}
+                  {dbStatus === "online"
+                    ? "Connected"
+                    : dbStatus === "offline"
+                      ? "Offline"
+                      : "Checking"}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={checkDb}
+                  disabled={checking}
+                  className="ml-auto border-slate-600 text-slate-300"
+                >
+                  <ServerCog className="h-4 w-4 mr-2" />
                   {checking ? "Checking" : "Check"}
                 </Button>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={syncAll} disabled={syncing} className="border-slate-600 text-slate-300">
-                  <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`}/>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={syncAll}
+                  disabled={syncing}
+                  className="border-slate-600 text-slate-300"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`}
+                  />
                   {syncing ? "Syncing" : "Sync Now"}
                 </Button>
-                <Button variant="outline" size="sm" onClick={backfill} className="border-slate-600 text-slate-300">
-                  <ServerCog className="h-4 w-4 mr-2"/>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={backfill}
+                  className="border-slate-600 text-slate-300"
+                >
+                  <ServerCog className="h-4 w-4 mr-2" />
                   Backfill Categories
                 </Button>
               </div>
-              {lastSync ? <p className="text-xs text-slate-400">Last sync: {lastSync}</p> : null}
+              {lastSync ? (
+                <p className="text-xs text-slate-400">Last sync: {lastSync}</p>
+              ) : null}
             </CardContent>
           </Card>
 
           <Card className="bg-slate-900/60 border-slate-700">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2"><CloudUpload className="h-5 w-5"/>Deployment</CardTitle>
+              <CardTitle className="text-white flex items-center gap-2">
+                <CloudUpload className="h-5 w-5" />
+                Deployment
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-slate-300">
-              <p>Deploy with Netlify directly from this platform using MCP integration.</p>
+              <p>
+                Deploy with Netlify directly from this platform using MCP
+                integration.
+              </p>
               <ul className="list-disc pl-6 text-sm space-y-1">
                 <li>Click "Open MCP popover" (top bar) and connect Netlify.</li>
                 <li>After connecting, use Netlify MCP to deploy this repo.</li>
-                <li>Set env: DATABASE_URL and NETLIFY_DATABASE_URL. Optional: AUTO_SEED_DEMO=0, AUTO_WIPE_IT_HR=0.</li>
+                <li>
+                  Set env: DATABASE_URL and NETLIFY_DATABASE_URL. Optional:
+                  AUTO_SEED_DEMO=0, AUTO_WIPE_IT_HR=0.
+                </li>
                 <li>Verify: /api/health and /api/db/health show OK.</li>
               </ul>
-              <Button variant="outline" size="sm" onClick={deployNetlify} className="border-slate-600 text-slate-300">
-                <CloudUpload className="h-4 w-4 mr-2"/>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={deployNetlify}
+                className="border-slate-600 text-slate-300"
+              >
+                <CloudUpload className="h-4 w-4 mr-2" />
                 Deploy via Netlify MCP
               </Button>
             </CardContent>
