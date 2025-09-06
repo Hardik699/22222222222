@@ -26,6 +26,8 @@ import {
   LayoutDashboard,
   Database,
   RefreshCw,
+  CloudUpload,
+  ServerCog,
 } from "lucide-react";
 
 export default function AppNav() {
@@ -171,6 +173,36 @@ export default function AppNav() {
     navigate("/master-admin");
   };
 
+  const deployNetlify = async () => {
+    try {
+      alert("To deploy: use the platform’s Netlify MCP. Click ‘Connect Netlify MCP’ in the top bar and deploy.");
+    } catch {}
+  };
+
+  const dbBackfill = async () => {
+    try {
+      const r = await fetch("/api/hr/admin/backfill-asset-categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-role": "admin" },
+      });
+      const j = await r.json();
+      alert(j?.ok ? `Backfill done (mirrored: ${j.mirrored || 0})` : `Backfill failed`);
+    } catch (e) {
+      alert("Backfill failed");
+    }
+  };
+
+  const dbHealth = async () => {
+    try {
+      const r = await fetch("/api/db/health");
+      const j = await r.json();
+      if (j?.connected) alert("Database connected");
+      else alert(`Database offline: ${j?.reason || j?.error || "Unknown"}`);
+    } catch {
+      alert("Database check failed");
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-900/90 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -266,6 +298,34 @@ export default function AppNav() {
                       />
                       {syncing ? "Syncing" : "Sync"}
                     </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white transition-all duration-300"
+                          title="Deploy & DB actions"
+                        >
+                          <CloudUpload className="h-4 w-4 mr-2" />
+                          Deploy
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white" align="end">
+                        <DropdownMenuItem className="focus:bg-slate-700 cursor-pointer" onClick={deployNetlify}>
+                          <CloudUpload className="h-4 w-4 mr-2" />
+                          Deploy to Netlify (MCP)
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-slate-700" />
+                        <DropdownMenuItem className="focus:bg-slate-700 cursor-pointer" onClick={dbHealth}>
+                          <ServerCog className="h-4 w-4 mr-2" />
+                          DB Health Check
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="focus:bg-slate-700 cursor-pointer" onClick={dbBackfill}>
+                          <ServerCog className="h-4 w-4 mr-2" />
+                          DB Backfill Categories
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </>
                 )}
 
