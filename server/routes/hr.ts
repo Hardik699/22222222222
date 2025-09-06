@@ -382,7 +382,9 @@ const listAssignments: RequestHandler = async (_req, res) => {
 
 const backfillAssetCategories: RequestHandler = async (_req, res, next) => {
   try {
-    const { rows } = await pool.query("SELECT id, category, serial_number, vendor_name, purchase_date, warranty_end_date, metadata, created_at FROM system_assets");
+    const { rows } = await pool.query(
+      "SELECT id, category, serial_number, vendor_name, purchase_date, warranty_end_date, metadata, created_at FROM system_assets",
+    );
     let count = 0;
     for (const r of rows as any[]) {
       const t = getCategoryTable(r.category);
@@ -501,6 +503,10 @@ export function hrRouter(): Router {
   router.post("/it-accounts", requireAdmin, createItAccount);
   router.post("/pc-laptops/upsert-batch", requireAdmin, upsertPcLaptopsBatch);
   router.get("/assignments", listAssignments);
-  router.post("/admin/backfill-asset-categories", requireAdmin, backfillAssetCategories);
+  router.post(
+    "/admin/backfill-asset-categories",
+    requireAdmin,
+    backfillAssetCategories,
+  );
   return router;
 }

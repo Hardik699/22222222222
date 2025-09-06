@@ -94,12 +94,10 @@ export const getSpreadsheetInfo: RequestHandler = async (_req, res) => {
       sheets: sheetTitles,
     });
   } catch (e: any) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: e?.message || "Failed to access spreadsheet",
-      });
+    res.status(500).json({
+      success: false,
+      error: e?.message || "Failed to access spreadsheet",
+    });
   }
 };
 
@@ -227,12 +225,10 @@ export const getHRSpreadsheetInfo: RequestHandler = async (_req, res) => {
       sheets: sheetTitles,
     });
   } catch (e: any) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: e?.message || "Failed to access spreadsheet",
-      });
+    res.status(500).json({
+      success: false,
+      error: e?.message || "Failed to access spreadsheet",
+    });
   }
 };
 

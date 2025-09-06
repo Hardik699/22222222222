@@ -67,8 +67,10 @@ export function createServer() {
       }
     }
     const sheetsConfigured = Boolean(
-      (process.env.GOOGLE_SHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS) ||
-      (process.env.GOOGLE_SHEET_ID_HR && process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS)
+      (process.env.GOOGLE_SHEET_ID &&
+        process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS) ||
+        (process.env.GOOGLE_SHEET_ID_HR &&
+          process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS),
     );
     res.json({ ok: true, db, dbError, sheetsConfigured });
   });
