@@ -501,5 +501,6 @@ export function hrRouter(): Router {
   router.post("/it-accounts", requireAdmin, createItAccount);
   router.post("/pc-laptops/upsert-batch", requireAdmin, upsertPcLaptopsBatch);
   router.get("/assignments", listAssignments);
+  router.post("/admin/backfill-asset-categories", requireAdmin, backfillAssetCategories);
   return router;
 }
