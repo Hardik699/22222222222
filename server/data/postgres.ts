@@ -1,14 +1,15 @@
 import { Pool } from "pg";
 import type { SalaryRecord, SalaryDocument } from "@shared/api";
 
-const DATABASE_URL = process.env.DATABASE_URL;
+const DATABASE_URL =
+  process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL;
 if (!DATABASE_URL) {
   throw new Error(
-    "DATABASE_URL is not set. To use the Postgres store, configure your Neon connection string in the environment.",
+    "DATABASE_URL/NETLIFY_DATABASE_URL is not set. Configure your Neon connection string in the environment.",
   );
 }
 
-const pool = new Pool({
+export const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: { rejectUnauthorized: false },
 });
@@ -40,6 +41,173 @@ async function init() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_salary_documents_salary_id ON salary_documents(salary_id);
+
+    -- HR / IT tables
+    CREATE TABLE IF NOT EXISTS employees (
+      id TEXT PRIMARY KEY,
+      full_name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      department TEXT NOT NULL,
+      status TEXT NOT NULL,
+      table_number TEXT,
+      profile JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    ALTER TABLE employees ADD COLUMN IF NOT EXISTS profile JSONB;
+
+    CREATE TABLE IF NOT EXISTS system_assets (
+      id TEXT PRIMARY KEY,
+      category TEXT NOT NULL,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      company_name TEXT,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    ALTER TABLE system_assets ADD COLUMN IF NOT EXISTS metadata JSONB;
+
+    -- Per-category tables (for reporting or future specialization)
+    CREATE TABLE IF NOT EXISTS mice (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS keyboards (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS motherboards (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS rams (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS storages (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS power_supplies (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS headphones (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS cameras (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS monitors (
+      id TEXT PRIMARY KEY,
+      serial_number TEXT NOT NULL,
+      vendor_name TEXT NOT NULL,
+      purchase_date DATE NOT NULL,
+      warranty_end_date DATE NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS vonage_numbers (
+      id TEXT PRIMARY KEY,
+      number TEXT,
+      ext_code TEXT,
+      password TEXT,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS vitel_global_numbers (
+      id TEXT PRIMARY KEY,
+      number TEXT,
+      ext_code TEXT,
+      password TEXT,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    -- PC/Laptop asset composition table
+    CREATE TABLE IF NOT EXISTS pc_laptop_assets (
+      id TEXT PRIMARY KEY,
+      mouse_id TEXT,
+      keyboard_id TEXT,
+      motherboard_id TEXT,
+      ram_id TEXT,
+      ram_id2 TEXT,
+      storage_id TEXT,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS asset_assignments (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
+      asset_id TEXT NOT NULL REFERENCES system_assets(id) ON DELETE CASCADE,
+      assigned_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS it_accounts (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT,
+      payload JSONB NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_assets_category ON system_assets(category);
+    CREATE INDEX IF NOT EXISTS idx_assign_emp ON asset_assignments(employee_id);
+    CREATE INDEX IF NOT EXISTS idx_assign_asset ON asset_assignments(asset_id);
   `);
 }
 

@@ -19,7 +19,7 @@ export function createDemoSystemAssets(): Asset[] {
       createdAt: today,
     },
     {
-      id: "WX-K-001", 
+      id: "WX-K-001",
       category: "keyboard",
       serialNumber: "COR-K70-456789",
       vendorName: "Corsair",
@@ -30,10 +30,10 @@ export function createDemoSystemAssets(): Asset[] {
     },
     {
       id: "WX-MB-001",
-      category: "motherboard", 
+      category: "motherboard",
       serialNumber: "ASU-B550M-123456",
       vendorName: "ASUS",
-      companyName: "Tech Solutions Inc", 
+      companyName: "Tech Solutions Inc",
       purchaseDate: "2024-01-10",
       warrantyEndDate: warranty,
       createdAt: today,
@@ -41,7 +41,7 @@ export function createDemoSystemAssets(): Asset[] {
     {
       id: "WX-R-001",
       category: "ram",
-      serialNumber: "COR-32GB-789012", 
+      serialNumber: "COR-32GB-789012",
       vendorName: "Corsair",
       companyName: "Tech Solutions Inc",
       purchaseDate: "2024-01-10",
@@ -52,7 +52,7 @@ export function createDemoSystemAssets(): Asset[] {
       id: "WX-PS-001",
       category: "power-supply",
       serialNumber: "EVG-750W-345678",
-      vendorName: "EVGA", 
+      vendorName: "EVGA",
       companyName: "Tech Solutions Inc",
       purchaseDate: "2024-01-10",
       warrantyEndDate: warranty,
@@ -69,7 +69,7 @@ export function createDemoSystemAssets(): Asset[] {
       createdAt: today,
     },
     {
-      id: "WX-C-001", 
+      id: "WX-C-001",
       category: "camera",
       serialNumber: "LOG-C920-234567",
       vendorName: "Logitech",
@@ -83,7 +83,7 @@ export function createDemoSystemAssets(): Asset[] {
       category: "monitor",
       serialNumber: "DEL-U2720Q-890123",
       vendorName: "Dell",
-      companyName: "Tech Solutions Inc", 
+      companyName: "Tech Solutions Inc",
       purchaseDate: "2024-01-15",
       warrantyEndDate: warranty,
       createdAt: today,
@@ -92,11 +92,11 @@ export function createDemoSystemAssets(): Asset[] {
     // Demo Set 2 - Office setup
     {
       id: "WX-M-002",
-      category: "mouse", 
+      category: "mouse",
       serialNumber: "HP-WL-mouse-112233",
       vendorName: "HP",
       companyName: "Business Corp",
-      purchaseDate: "2024-02-01", 
+      purchaseDate: "2024-02-01",
       warrantyEndDate: warranty,
       createdAt: today,
     },
@@ -104,14 +104,14 @@ export function createDemoSystemAssets(): Asset[] {
       id: "WX-K-002",
       category: "keyboard",
       serialNumber: "HP-KB-wired-445566",
-      vendorName: "HP", 
+      vendorName: "HP",
       companyName: "Business Corp",
       purchaseDate: "2024-02-01",
       warrantyEndDate: warranty,
       createdAt: today,
     },
     {
-      id: "WX-MB-002", 
+      id: "WX-MB-002",
       category: "motherboard",
       serialNumber: "HP-OFFICE-MB-778899",
       vendorName: "HP",
@@ -123,7 +123,7 @@ export function createDemoSystemAssets(): Asset[] {
     {
       id: "WX-R-002",
       category: "ram",
-      serialNumber: "HP-16GB-DDR4-998877", 
+      serialNumber: "HP-16GB-DDR4-998877",
       vendorName: "HP",
       companyName: "Business Corp",
       purchaseDate: "2024-02-01",
@@ -135,7 +135,7 @@ export function createDemoSystemAssets(): Asset[] {
       category: "power-supply",
       serialNumber: "HP-500W-654321",
       vendorName: "HP",
-      companyName: "Business Corp", 
+      companyName: "Business Corp",
       purchaseDate: "2024-02-01",
       warrantyEndDate: warranty,
       createdAt: today,
@@ -152,7 +152,7 @@ export function createDemoSystemAssets(): Asset[] {
     },
     {
       id: "WX-C-002",
-      category: "camera", 
+      category: "camera",
       serialNumber: "HP-WEB-CAM-556677",
       vendorName: "HP",
       companyName: "Business Corp",
@@ -166,7 +166,7 @@ export function createDemoSystemAssets(): Asset[] {
       serialNumber: "HP-24inch-334455",
       vendorName: "HP",
       companyName: "Business Corp",
-      purchaseDate: "2024-02-01", 
+      purchaseDate: "2024-02-01",
       warrantyEndDate: warranty,
       createdAt: today,
     },
@@ -191,20 +191,27 @@ export function createDemoSystemAssets(): Asset[] {
 export function loadDemoData() {
   const existing = localStorage.getItem(STORAGE_KEY);
   const currentAssets: Asset[] = existing ? JSON.parse(existing) : [];
-  
+
   // Check if demo data already exists
-  const hasDemo = currentAssets.some(asset => 
-    asset.id.includes("WX-M-001") || asset.id.includes("WX-M-002")
+  const hasDemo = currentAssets.some(
+    (asset) => asset.id.includes("WX-M-001") || asset.id.includes("WX-M-002"),
   );
-  
+
   if (!hasDemo) {
     const demoAssets = createDemoSystemAssets();
     const allAssets = [...currentAssets, ...demoAssets];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(allAssets));
+    try {
+      fetch("/api/hr/assets/upsert-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-role": "admin" },
+        body: JSON.stringify({ items: demoAssets }),
+      }).catch(() => {});
+    } catch {}
     console.log("Demo system assets loaded:", demoAssets.length);
     return demoAssets;
   }
-  
+
   console.log("Demo data already exists");
   return [];
 }

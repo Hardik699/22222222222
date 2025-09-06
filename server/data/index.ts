@@ -1,21 +1,27 @@
 import * as fileStore from "./store";
-import { createRequire } from "module";
-
-const requireCjs = createRequire(import.meta.url);
 
 let selected: any = fileStore;
-if (process.env.DATABASE_URL) {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const pgStore = requireCjs("./postgres");
-    selected = pgStore;
-  } catch (err) {
-    console.error(
-      "Failed to load Postgres store, falling back to file store:",
-      err,
-    );
-    selected = fileStore;
-  }
+const HAS_DB = Boolean(
+  process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL,
+);
+
+if (HAS_DB) {
+  import("./postgres")
+    .then((pgStore) => {
+      selected = pgStore;
+    })
+    .catch((err) => {
+      console.error(
+        "Failed to load Postgres store, falling back to file store:",
+        err,
+      );
+      selected = fileStore;
+    });
 }
 
-export const db = selected.db;
+export const db = new Proxy({} as any, {
+  get(_target, prop) {
+    const impl = (selected as any).db;
+    return (impl as any)[prop as any];
+  },
+});

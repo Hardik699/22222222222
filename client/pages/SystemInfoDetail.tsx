@@ -217,7 +217,7 @@ export default function SystemInfoDetail() {
     setShowForm(true);
   };
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isTelephony) {
       const number = isVitel ? form.vitelNumber : form.vonageNumber;
@@ -280,6 +280,16 @@ export default function SystemInfoDetail() {
     const next = [record, ...assets];
     setAssets(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    // Sync to Neon DB
+    try {
+      await fetch("/api/hr/assets/upsert-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-role": "admin" },
+        body: JSON.stringify({ items: [record] }),
+      });
+    } catch (e) {
+      console.warn("DB sync failed", e);
+    }
     setShowForm(false);
     alert("Saved");
   };

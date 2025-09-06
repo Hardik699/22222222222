@@ -72,10 +72,14 @@ async function writeTable(
 export const getSpreadsheetInfo: RequestHandler = async (_req, res) => {
   try {
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    if (!spreadsheetId)
-      return res
-        .status(400)
-        .json({ success: false, error: "GOOGLE_SHEET_ID not set" });
+    if (!spreadsheetId || !process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS)
+      return res.json({
+        success: false,
+        disabled: true,
+        reason: !spreadsheetId
+          ? "GOOGLE_SHEET_ID not set"
+          : "GOOGLE_SERVICE_ACCOUNT_CREDENTIALS not set",
+      });
     const sheets = await getSheetsClient();
     const resp = await sheets.spreadsheets.get({ spreadsheetId });
     const title = resp.data.properties?.title || "";
@@ -90,12 +94,10 @@ export const getSpreadsheetInfo: RequestHandler = async (_req, res) => {
       sheets: sheetTitles,
     });
   } catch (e: any) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: e?.message || "Failed to access spreadsheet",
-      });
+    res.status(500).json({
+      success: false,
+      error: e?.message || "Failed to access spreadsheet",
+    });
   }
 };
 
@@ -105,10 +107,14 @@ export const syncMasterDataToGoogleSheets: RequestHandler = async (
 ) => {
   try {
     const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    if (!spreadsheetId)
-      return res
-        .status(400)
-        .json({ success: false, error: "GOOGLE_SHEET_ID not set" });
+    if (!spreadsheetId || !process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS)
+      return res.json({
+        success: false,
+        disabled: true,
+        reason: !spreadsheetId
+          ? "GOOGLE_SHEET_ID not set"
+          : "GOOGLE_SERVICE_ACCOUNT_CREDENTIALS not set",
+      });
     const { masterData } = req.body as { masterData: any };
     if (!masterData)
       return res
@@ -197,10 +203,14 @@ export const syncMasterDataToGoogleSheets: RequestHandler = async (
 export const getHRSpreadsheetInfo: RequestHandler = async (_req, res) => {
   try {
     const spreadsheetId = process.env.GOOGLE_SHEET_ID_HR;
-    if (!spreadsheetId)
-      return res
-        .status(400)
-        .json({ success: false, error: "GOOGLE_SHEET_ID_HR not set" });
+    if (!spreadsheetId || !process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS)
+      return res.json({
+        success: false,
+        disabled: true,
+        reason: !spreadsheetId
+          ? "GOOGLE_SHEET_ID_HR not set"
+          : "GOOGLE_SERVICE_ACCOUNT_CREDENTIALS not set",
+      });
     const sheets = await getSheetsClient();
     const resp = await sheets.spreadsheets.get({ spreadsheetId });
     const title = resp.data.properties?.title || "";
@@ -215,22 +225,24 @@ export const getHRSpreadsheetInfo: RequestHandler = async (_req, res) => {
       sheets: sheetTitles,
     });
   } catch (e: any) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: e?.message || "Failed to access spreadsheet",
-      });
+    res.status(500).json({
+      success: false,
+      error: e?.message || "Failed to access spreadsheet",
+    });
   }
 };
 
 export const syncHRDataToGoogleSheets: RequestHandler = async (req, res) => {
   try {
     const spreadsheetId = process.env.GOOGLE_SHEET_ID_HR;
-    if (!spreadsheetId)
-      return res
-        .status(400)
-        .json({ success: false, error: "GOOGLE_SHEET_ID_HR not set" });
+    if (!spreadsheetId || !process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS)
+      return res.json({
+        success: false,
+        disabled: true,
+        reason: !spreadsheetId
+          ? "GOOGLE_SHEET_ID_HR not set"
+          : "GOOGLE_SERVICE_ACCOUNT_CREDENTIALS not set",
+      });
     const { masterData } = req.body as { masterData: any };
     if (!masterData)
       return res

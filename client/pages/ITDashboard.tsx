@@ -229,6 +229,12 @@ export default function ITDashboard() {
     const next = [rec as ITRecord, ...records];
     setRecords(next);
     localStorage.setItem("itAccounts", JSON.stringify(next));
+    // sync to DB
+    fetch("/api/hr/it-accounts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-role": "admin" },
+      body: JSON.stringify(rec),
+    }).catch(() => {});
     // mark pending notification processed
     const allNotifications = JSON.parse(
       localStorage.getItem("pendingITNotifications") || "[]",
